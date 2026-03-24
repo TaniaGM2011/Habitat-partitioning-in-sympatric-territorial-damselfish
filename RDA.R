@@ -30,7 +30,7 @@ RsquareAdj(fauna.rda)
 anova.cca(fauna.rda, permutations = 9999)                     # Significancia global
 anova.cca(fauna.rda, permutations = 9999, by = "term")        # Significancia de cada predictor
 anova.cca(fauna.rda, permutations = 9999, by = "axis")        # Significancia por eje
-vif.cca(fauna.rda)                                     # Colinealidad entre predictores
+vif.cca(fauna.rda)                                            # Colinealidad entre predictores
 
 # Extraer coordenadas
 sites_df <- as.data.frame(scores(fauna.rda, display = "sites", scaling = 2))
@@ -52,12 +52,15 @@ species_df$Taxon <- rownames(species_df)
 species_df$Grupo <- ifelse(grepl("S.acapulcoensis", species_df$Taxon), "S. acapulcoensis", 
                            ifelse(grepl("S.flavilatus", species_df$Taxon), "S. flavilatus", "Otro"))
 
-col_taxon <- c("S. acapulcoensis" = "#C16540", "S. flavilatus" = "#00C1C8", "Otro" = "gray30")
+col_taxon <- c("S. acapulcoensis" = "#C16540", 
+               "S. flavilatus" = "#00C1C8", 
+               "Otro" = "gray30")
 
 # Crear gráfico con límites fijos
 rda_plot <- ggplot() +
   # Sitios
-  geom_point(data = sites_df, aes(x = RDA1, y = RDA2, color = Profundidad, shape = Especie), size = 3, alpha = 0.9) +
+  geom_point(data = sites_df, aes(x = RDA1, y = RDA2, color = Profundidad, shape = Especie), 
+             size = 3, alpha = 0.9) +
   
   # Flechas de especies
   geom_segment(data = species_df, aes(x = 0, y = 0, xend = RDA1, yend = RDA2, color = Grupo),
@@ -79,10 +82,28 @@ rda_plot <- ggplot() +
   xlim(-1, 1.2) +
   ylim(-1, 1.2) +
   
-  # Estilo y leyendas
-  scale_color_manual(values = c(colores, col_taxon)) +
-  scale_shape_manual(values = formas) +
-  labs(x = "RDA1 (27.84%)", y = "RDA2 (11.55%)", color = NULL, shape = "Especie") +
+  # Escalas y leyendas con nombres completos
+  scale_color_manual(
+    values = c(colores, col_taxon),
+    labels = c(
+      "Shallow"           = "Somero",
+      "Intermediate"      = "Intermedio",
+      "Deep"              = "Profundo",
+      "S. acapulcoensis"  = expression(italic("Stegastes acapulcoensis")),
+      "S. flavilatus"     = expression(italic("Stegastes flavilatus")),
+      "Otro"              = "Otro"
+    )
+  ) +
+  scale_shape_manual(
+    values = formas,
+    labels = c(
+      "S. acapulcoensis" = expression(italic("Stegastes acapulcoensis")),
+      "S. flavilatus"    = expression(italic("Stegastes flavilatus"))
+    )
+  ) +
+  
+  labs(x = "RDA1 (27.84%)", y = "RDA2 (11.55%)", 
+       color = NULL, shape = "Especie") +
   theme_classic(base_family = "Arial") +
   theme(
     text = element_text(size = 11),
@@ -91,7 +112,6 @@ rda_plot <- ggplot() +
     axis.text = element_text(size = 10),
     strip.text = element_text(size = 10)
   )
-
 
 # Guardar como TIFF
 tiff("F:/Doctorado/TESIS version 3/capitulo 1.- corregido/figuras/rda_ggplot.tiff",
